@@ -5352,17 +5352,16 @@ void ShowExampleAppDockSpace(bool* p_open)
     static bool show_subwindows = false;
     if (configure_dock_space) {
 
-        ImVec2 availableSize = ImGui::GetContentRegionAvail();
-
         ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
 
         ImGui::DockBuilderRemoveNode(dockspace_id);
         ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
-        ImGui::DockBuilderSetNodeSize(dockspace_id, availableSize);
+        ImGui::DockBuilderSetNodeSize(dockspace_id, ImGui::GetContentRegionAvail());
 
         ImGuiID docked_window_id = 0;
+        ImGuiID dummy_id = 0;
 
-        ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Down, 0.5f, &docked_window_id, NULL);
+        ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Left, 0.5f, &docked_window_id, &dummy_id);
 
         ImGuiDockNodeFlags flags = ImGuiDockNodeFlags_NoCloseButton | ImGuiDockNodeFlags_HiddenTabBar;
         ImGui::DockBuilderAddNode(docked_window_id, flags);
