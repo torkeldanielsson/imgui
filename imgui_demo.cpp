@@ -80,6 +80,8 @@ Index of this file:
 #include <stdint.h>         // intptr_t
 #endif
 
+#include "imgui_internal.h"
+
 // Visual Studio warnings
 #ifdef _MSC_VER
 #pragma warning (disable: 4996) // 'This function or variable may be unsafe': strcpy, strdup, sprintf, vsnprintf, sscanf, fopen
@@ -5345,6 +5347,33 @@ void ShowExampleAppDockSpace(bool* p_open)
     if (opt_fullscreen)
         ImGui::PopStyleVar(2);
 
+    // DockSpace Configuration
+    static bool configure_dock_space = false;
+    static bool show_subwindows = false;
+    if (configure_dock_space) {
+
+        ImVec2 availableSize = ImGui::GetContentRegionAvail();
+
+        ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+
+        ImGui::DockBuilderRemoveNode(dockspace_id);
+        ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
+        ImGui::DockBuilderSetNodeSize(dockspace_id, availableSize);
+
+        ImGuiID docked_window_id = 0;
+
+        ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Down, 0.5f, &docked_window_id, NULL);
+
+        ImGuiDockNodeFlags flags = ImGuiDockNodeFlags_NoCloseButton | ImGuiDockNodeFlags_HiddenTabBar;
+        ImGui::DockBuilderAddNode(docked_window_id, flags);
+
+        ImGui::DockBuilderDockWindow("Docked Window", docked_window_id);
+
+        ImGui::DockBuilderFinish(dockspace_id);
+
+        configure_dock_space = false;
+    }
+
     // DockSpace
     ImGuiIO& io = ImGui::GetIO();
     if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
@@ -5372,6 +5401,10 @@ void ShowExampleAppDockSpace(bool* p_open)
             if (ImGui::MenuItem("Flag: NoDockingInCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_NoDockingInCentralNode) != 0))  { dockspace_flags ^= ImGuiDockNodeFlags_NoDockingInCentralNode; }
             if (ImGui::MenuItem("Flag: AutoHideTabBar",         "", (dockspace_flags & ImGuiDockNodeFlags_AutoHideTabBar) != 0))          { dockspace_flags ^= ImGuiDockNodeFlags_AutoHideTabBar; }
             if (ImGui::MenuItem("Flag: PassthruCentralNode",    "", (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0, opt_fullscreen)) { dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode; }
+            if (ImGui::MenuItem("Flag: PassthruCentralNode",    "", (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0, opt_fullscreen)) { dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode; }
+            ImGui::Separator();
+
+            if (ImGui::MenuItem("Configure dockspace", "")) { configure_dock_space = true; show_subwindows = true; }
             ImGui::Separator();
 
             if (ImGui::MenuItem("Close", NULL, false, p_open != NULL))
@@ -5391,6 +5424,12 @@ void ShowExampleAppDockSpace(bool* p_open)
         );
 
         ImGui::EndMenuBar();
+    }
+
+    if (show_subwindows) {
+        ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiCond_FirstUseEver);
+        ImGui::Begin("Docked Window", NULL, 0);
+        ImGui::End();
     }
 
     ImGui::End();
